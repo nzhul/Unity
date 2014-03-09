@@ -9,19 +9,32 @@ public class CarController : MonoBehaviour {
     public Transform lowestGroundObject;
     public Transform respawnPosition;
 
+    public GUIText debugOutput;
+
 	// Use this for initialization
 	void Start () {
 	}
+
+    public void Respawn()
+    {
+        transform.position = respawnPosition.position;
+        transform.rotation = respawnPosition.rotation;
+        rigidbody.velocity = Vector3.zero;
+        rigidbody.angularVelocity = Vector3.zero;
+        transform.rotation = Quaternion.LookRotation(transform.forward, Vector3.up);
+    }
 	
 	// Update is called once per frame
 	void Update () {
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+
+        debugOutput.text = ""+transform.position.x;
         if (transform.position.y < lowestGroundObject.position.y)
         {
-            transform.position = respawnPosition.position;
-            transform.rotation = respawnPosition.rotation;
-            rigidbody.velocity = Vector3.zero;
-            rigidbody.angularVelocity = Vector3.zero;
-            transform.rotation = Quaternion.LookRotation(transform.forward, Vector3.up);
+            Respawn();
         }
 
         if (Input.GetKey(KeyCode.W))
