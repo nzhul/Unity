@@ -19,8 +19,8 @@ public class CarController : MonoBehaviour {
     {
         transform.position = respawnPosition.position;
         transform.rotation = respawnPosition.rotation;
-        rigidbody.velocity = Vector3.zero;
-        rigidbody.angularVelocity = Vector3.zero;
+        GetComponent<Rigidbody>().velocity = Vector3.zero;
+        GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
         transform.rotation = Quaternion.LookRotation(transform.forward, Vector3.up);
     }
 	
@@ -59,8 +59,8 @@ public class CarController : MonoBehaviour {
         if (Input.GetKey(KeyCode.X))
         {
             transform.position += Vector3.up;
-            rigidbody.velocity = Vector3.zero;
-            rigidbody.angularVelocity = Vector3.zero;
+            GetComponent<Rigidbody>().velocity = Vector3.zero;
+            GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
             transform.rotation = Quaternion.LookRotation(transform.forward, Vector3.up);
         }
 	}
