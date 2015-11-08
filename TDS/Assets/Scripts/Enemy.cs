@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class Enemy : LivingEntity {
@@ -26,28 +27,47 @@ public class Enemy : LivingEntity {
 
 	bool hasTarget;
 
-	protected override void Start () {
-		base.Start();
+	void Awake()
+	{
 		pathFinder = GetComponent<NavMeshAgent>();
-		skinMaterial = GetComponent<Renderer>().material;
-		originalColor = skinMaterial.color;
 
 		if (GameObject.FindGameObjectWithTag("Player") != null)
 		{
-			currentState = State.Chasing;
 			hasTarget = true;
 
 			target = GameObject.FindGameObjectWithTag("Player").transform;
 			targetEntity = target.GetComponent<LivingEntity>();
-			targetEntity.OnDeath += OnTargetDeath;
-
-
-
-			StartCoroutine(UpdatePath());
 
 			myCollisionRadius = GetComponent<CapsuleCollider>().radius;
 			targetCollisionRadius = target.GetComponent<CapsuleCollider>().radius;
 		}
+	}
+
+	protected override void Start () {
+		base.Start();
+
+		if (hasTarget)
+		{
+			currentState = State.Chasing;
+			targetEntity.OnDeath += OnTargetDeath;
+
+			StartCoroutine(UpdatePath());
+		}
+	}
+
+	public void SetCharacteristics(float moveSpeed, int hitsToKillPlayer, float enemyHealth, Color skinColor)
+	{
+		pathFinder.speed = moveSpeed;
+		if (hasTarget)
+		{
+			damage = Mathf.Ceil(targetEntity.startingHealth / hitsToKillPlayer);
+		}
+
+		startingHealth = enemyHealth;
+
+		skinMaterial = GetComponent<Renderer>().material;
+		skinMaterial.color = skinColor;
+		originalColor = skinMaterial.color;
 	}
 
 	public override void TakeHit(float damage, Vector3 hitPoint, Vector3 hitDirection)
