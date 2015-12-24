@@ -10,6 +10,7 @@ public class GameUI : MonoBehaviour {
 	public RectTransform newWaveBanner;
 	public Text newWaveTitle;
 	public Text newWaveEnemyCount;
+	public Text scoreUI;
 
 	Spawner spawner;
 
@@ -21,6 +22,11 @@ public class GameUI : MonoBehaviour {
 	{
 		spawner = FindObjectOfType<Spawner>();
 		spawner.OnNewWave += OnNewWave;
+	}
+
+	void Update()
+	{
+		scoreUI.text = ScoreKeeper.score.ToString("D6");
 	}
 
 	void OnNewWave(int waveNumber)

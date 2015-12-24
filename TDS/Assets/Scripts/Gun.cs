@@ -29,6 +29,8 @@ public class Gun : MonoBehaviour {
 	[Header("Effects")]
 	public Transform shell;
 	public Transform shellEjection;
+	public AudioClip shootAudio;
+	public AudioClip reloadAudio;
 	MuzzleFlash muzzleFlash;
 	float nextShotTime;
 
@@ -65,6 +67,7 @@ public class Gun : MonoBehaviour {
 	{
 		if (!isReloading && Time.time > nextShotTime && projectilesRemainingInMag > 0)
 		{
+
 			if (fireMode == FireMode.Burst)
 			{
 				if (shotsRemainingInBurst == 0)
@@ -92,7 +95,7 @@ public class Gun : MonoBehaviour {
 				Projectile newProjectile = Instantiate(projectile, projectileSpawn[i].position, projectileSpawn[i].rotation) as Projectile;
 				newProjectile.SetSpeed(muzzleVelocity);
 			}
-
+			AudioManager.instance.PlaySound(shootAudio, transform.position);
 			Instantiate(shell, shellEjection.position, shellEjection.rotation);
 			muzzleFlash.Activate();
 			transform.localPosition -= Vector3.forward * Random.Range(kickMinMax.x, kickMinMax.y);
@@ -106,6 +109,7 @@ public class Gun : MonoBehaviour {
 		if (!isReloading && projectilesRemainingInMag != projectilesPerMag)
 		{
 			StartCoroutine(AnimateReload());
+			AudioManager.instance.PlaySound(reloadAudio, transform.position);
 		}
 	}
 
