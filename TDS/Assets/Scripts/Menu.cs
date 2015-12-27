@@ -34,7 +34,7 @@ public class Menu : MonoBehaviour {
 	
 	public void Play()
 	{
-		SceneManager.LoadScene("main");
+		SceneManager.LoadScene("Game");
 	}
 
 	public void Quit()

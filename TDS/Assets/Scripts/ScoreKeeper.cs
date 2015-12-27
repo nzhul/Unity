@@ -6,6 +6,7 @@ public class ScoreKeeper : MonoBehaviour {
 	public static int score { get; private set; }
 	float lastEnemyKillTime;
 	int streakCount;
+	int maxStreakCount = 5;
 	float streakExpiryTime = 1;
 
 	void Start()
@@ -16,7 +17,7 @@ public class ScoreKeeper : MonoBehaviour {
 
 	void OnEnemyKilled()
 	{
-		if (Time.time < lastEnemyKillTime + streakExpiryTime)
+		if (Time.time < lastEnemyKillTime + streakExpiryTime && streakCount <= maxStreakCount)
 		{
 			streakCount++;
 		}

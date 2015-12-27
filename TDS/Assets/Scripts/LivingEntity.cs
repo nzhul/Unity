@@ -5,7 +5,7 @@ using System;
 public class LivingEntity : MonoBehaviour, IDamageable
 {
 	public float startingHealth;
-	protected float health;
+	public float health { get; protected set; }
 	protected bool dead;
 
 	public event Action OnDeath;
