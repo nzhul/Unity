@@ -83,26 +83,26 @@ public class Pathfinding : MonoBehaviour {
 		yield return null;
 		if (pathSuccess)
 		{
-			waypoints = RetracePath(startNode, targetNode);
+			//waypoints = RetracePath(startNode, targetNode);
 		}
 		requestManager.FinishedProcessingPath(waypoints, pathSuccess);
 
 	}
 
-	Vector3[] RetracePath(Node startNode, Node endNode)
-	{
-		List<Node> path = new List<Node>();
-		Node currentNode = endNode;
+	//Vector3[] RetracePath(Node startNode, Node endNode)
+	//{
+	//	List<Node> path = new List<Node>();
+	//	Node currentNode = endNode;
 
-		while (currentNode != startNode)
-		{
-			path.Add(currentNode);
-			currentNode = currentNode.parent;
-		}
+	//	while (currentNode != startNode)
+	//	{
+	//		path.Add(currentNode);
+	//		currentNode = currentNode.parent;
+	//	}
 
-		path.Reverse();
+	//	path.Reverse();
 
-	}
+	//}
 
 	int GetDistance(Node nodeA, Node nodeB)
 	{

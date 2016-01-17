@@ -9,6 +9,8 @@ public class Controller2D : RaycastController {
 
 	public CollisionInfo collisions;
 
+	public event Action OnEnemyCollision;
+
 	[HideInInspector]
 	public Vector2 playerInput;
 
@@ -18,17 +20,11 @@ public class Controller2D : RaycastController {
 		collisions.faceDir = 1;
 	}
 
-	public void Move(Vector3 velocity, bool standingOnPlatform)
-	{
-		Move(velocity, Vector2.zero, standingOnPlatform);
-	}
-
-	public void Move(Vector3 velocity, Vector2 input, bool standingOnPlatform = false)
+	public void Move(Vector3 velocity, bool standingOnPlatform = false)
 	{
 		UpdateRaycastOrigins();
 		collisions.Reset();
 		collisions.velocityOld = velocity;
-		playerInput = input;
 
 		if (velocity.x != 0)
 		{
@@ -126,6 +122,7 @@ public class Controller2D : RaycastController {
 			Vector2 rayOrigin = (directionY == -1)?raycastOrigins.bottomLeft:raycastOrigins.topLeft;
 			rayOrigin += Vector2.right * (verticalRaySpacing * i + velocity.x);
 			RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, collisionMask);
+			RaycastHit2D enemyHit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, enemyCollisionMask);
 
 			Debug.DrawRay(rayOrigin, Vector2.up * directionY * rayLength, Color.red);
 
@@ -146,6 +143,14 @@ public class Controller2D : RaycastController {
 						collisions.fallingThroughPlatform = true;
 						Invoke("ResetFallingThroughPlatform", .5f);
 						continue;
+					}
+				}
+
+				if (enemyHit)
+				{
+					if (OnEnemyCollision != null)
+					{
+						OnEnemyCollision();
 					}
 				}
 

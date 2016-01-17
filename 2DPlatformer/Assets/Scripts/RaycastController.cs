@@ -5,6 +5,7 @@ using System.Collections;
 public class RaycastController : MonoBehaviour {
 
 	public LayerMask collisionMask;
+	public LayerMask enemyCollisionMask;
 
 	public const float skinWidth = .015f;
 	public int horizontalRayCount = 4;

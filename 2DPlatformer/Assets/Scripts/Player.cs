@@ -34,6 +34,12 @@ public class Player : MonoBehaviour {
 		maxJumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
 		minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
 		print("Gravity: " + gravity + " Jump Velocity: " + maxJumpVelocity);
+		controller.OnEnemyCollision += OnEnemyCollision;
+	}
+
+	void OnEnemyCollision()
+	{
+		Debug.Log("Enemy collision");
 	}
 
 	void Update()
@@ -106,7 +112,7 @@ public class Player : MonoBehaviour {
 		}
 
 		velocity.y += gravity * Time.deltaTime;
-		controller.Move(velocity * Time.deltaTime, input);
+		controller.Move(velocity * Time.deltaTime);
 
 		if (controller.collisions.above || controller.collisions.below)
 		{
