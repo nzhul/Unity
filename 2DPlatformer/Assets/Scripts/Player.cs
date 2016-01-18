@@ -23,13 +23,16 @@ public class Player : MonoBehaviour {
 	float minJumpVelocity;
 	Vector3 velocity;
 	float velocityXSmoothing;
-	
 
+	SpriteRenderer renderer;
+	Animator animator;
 	Controller2D controller;
 
 	void Start()
 	{
+		renderer = GetComponent<SpriteRenderer>();
 		controller = GetComponent<Controller2D>();
+		animator = GetComponent<Animator>();
 		gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2); // This is some physics formula :)
 		maxJumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
 		minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
@@ -45,6 +48,30 @@ public class Player : MonoBehaviour {
 	void Update()
 	{
 		Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+
+
+
+		if (velocity.y != 0)
+		{
+			animator.Play("NinjaJump");
+		}
+		else if (input.x != 0)
+		{
+			if (input.x > 0)
+			{
+				renderer.flipX = false;
+			}
+			else
+			{
+				renderer.flipX = true;
+			}
+			animator.Play("NinjaRun");
+		}
+		else
+		{
+			animator.Play("NinjaIdle");
+		}
+
 		int wallDirX = (controller.collisions.left) ? -1 : 1;
 
 		float targetVelocityX = input.x * moveSpeed;
