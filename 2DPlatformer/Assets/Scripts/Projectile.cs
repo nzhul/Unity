@@ -13,23 +13,43 @@ public class Projectile : MonoBehaviour {
 	public float damage = 1;
 	public float lifeTime = .2f; // Must be relative depending target distance
 	float skinWidth = .1f; // Used to fix collision detection in very close range
-	public Transform target;
+	public Enemy target;
+	private bool alreadyHit;
+
 	public event Action OnDestinationReach;
+
+	public float Magnitude { get; set; }
 
 	void Update()
 	{
-		transform.position = MoveTowardsCustom(transform.position, target.position, speed * Time.deltaTime);
+		if (target != null)
+		{
+			transform.position = MoveTowardsCustom(transform.position, target, speed * Time.deltaTime);
+		}
+		else
+		{
+			Destroy(gameObject);
+		}
 	}
 
-	Vector2 MoveTowardsCustom(Vector2 current, Vector2 target, float maxDistanceDelta)
+	Vector2 MoveTowardsCustom(Vector2 current, Enemy target, float maxDistanceDelta)
 	{
 		Vector2 bending = Vector2.down;
-		Vector2 a = target - current;
+		Vector2 targetPosition = (Vector2)target.transform.position;
+        Vector2 a = targetPosition - current;
 		float magnitude = a.magnitude;
 		if (magnitude <= maxDistanceDelta || magnitude == 0f)
 		{
 			Destroy(gameObject, lifeTime);
-			return target;
+
+			if (!alreadyHit)
+			{
+				OnHitObject(target.gameObject);
+				alreadyHit = true;
+			}
+
+
+			return targetPosition;
 		}
 
 		Vector2 currentPos = current + a / magnitude * maxDistanceDelta;
@@ -39,4 +59,13 @@ public class Projectile : MonoBehaviour {
 
 		return currentPos;
     }
+
+	void OnHitObject(GameObject hitTarget)
+	{
+		IDamageable damageableObject = hitTarget.GetComponent<IDamageable>();
+		if (damageableObject != null)
+		{
+			damageableObject.TakeHit(damage, transform.position, transform.position.normalized);
+		} 
+	}
 }

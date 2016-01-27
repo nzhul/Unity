@@ -3,6 +3,7 @@ using System.Collections;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Assets.Scripts.Player;
 
 [RequireComponent(typeof(Controller2D))]
 [RequireComponent(typeof(AbilityManager))]
@@ -30,6 +31,7 @@ public class Player : MonoBehaviour {
 
 	[HideInInspector]
 	public List<GameObject> Enemies;
+	GameObject closestEnemy;
 
 	[Header("Shooting:")]
 	public float shootingRange = 6f;
@@ -51,8 +53,24 @@ public class Player : MonoBehaviour {
 		minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
 		controller.OnEnemyCollision += OnEnemyCollision;
 
-		Enemies = GameObject.FindGameObjectsWithTag("Enemy")
-							.OrderBy(go => Vector3.Distance(go.transform.position, transform.position)).ToList();
+		// TODO: Update enemies list on Update method but with Enumerator on every 1-2 seconds
+		// TODO: We may not need to update the list on every frame but just to find the new closest enemy.
+		// TODO: The update for the list entries must be done via message when new enemy dies or spawns.
+		Enemies = GameObject.FindGameObjectsWithTag("Enemy").ToList();
+
+		foreach (GameObject enemy in Enemies)
+		{
+			Enemy enemyComponent = enemy.GetComponent<Enemy>();
+			enemyComponent.OnDeath += OnEnemyDeath;
+		}
+
+		// Currently not working. Find a way to fix this or use mouse targeting
+		//StartCoroutine(FindClosestEnemy());
+	}
+
+	private void OnEnemyDeath()
+	{
+		Enemies.Remove(closestEnemy);
 	}
 
 	void OnEnemyCollision()
@@ -177,12 +195,27 @@ public class Player : MonoBehaviour {
 
 	private void Shoot()
 	{
-		GameObject closestEnemy = Enemies.FirstOrDefault();
-		float distance = Vector2.Distance(transform.position, closestEnemy.transform.position);
-		if (distance < shootingRange)
+		if (closestEnemy == null)
 		{
-			Projectile newProjetile = Instantiate(projectile, transform.position, transform.rotation) as Projectile;
-			newProjetile.target = closestEnemy.transform;
+			closestEnemy = Enemies.OrderBy(go => Vector3.Distance(go.transform.position, transform.position)).FirstOrDefault();
 		}
+
+		if (closestEnemy != null)
+		{
+			float distance = Vector2.Distance(transform.position, closestEnemy.transform.position);
+			if (distance < shootingRange)
+			{
+				Projectile newProjetile = Instantiate(projectile, transform.position, transform.rotation) as Projectile;
+
+				Enemy theEnemy = closestEnemy.GetComponent<Enemy>();
+				newProjetile.target = theEnemy;
+			}
+		}
+	}
+
+	IEnumerator FindClosestEnemy()
+	{
+		closestEnemy = Enemies.OrderBy(go => Vector3.Distance(go.transform.position, transform.position)).FirstOrDefault();
+		yield return new WaitForSeconds(1);
 	}
 }

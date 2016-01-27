@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Enemy : MonoBehaviour {
+public class Enemy : LivingEntity {
 
 	public enum State
 	{
@@ -20,6 +20,7 @@ public class Enemy : MonoBehaviour {
 
 	void Start()
 	{
+		base.Start();
 		controller = GetComponent<Controller2D>();
 	}
 
