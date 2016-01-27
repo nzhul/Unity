@@ -1,7 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
+using System.Linq;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(Controller2D))]
+[RequireComponent(typeof(AbilityManager))]
 public class Player : MonoBehaviour {
 
 	public float maxJumpHeight = 4;
@@ -24,20 +28,31 @@ public class Player : MonoBehaviour {
 	Vector3 velocity;
 	float velocityXSmoothing;
 
-	SpriteRenderer renderer;
+	[HideInInspector]
+	public List<GameObject> Enemies;
+
+	[Header("Shooting:")]
+	public float shootingRange = 6f;
+	public Projectile projectile;
+
+	SpriteRenderer spriteRenderer;
 	Animator animator;
 	Controller2D controller;
+	AbilityManager abilityManager;
 
 	void Start()
 	{
-		renderer = GetComponent<SpriteRenderer>();
+		spriteRenderer = GetComponent<SpriteRenderer>();
 		controller = GetComponent<Controller2D>();
 		animator = GetComponent<Animator>();
+		abilityManager = GetComponent<AbilityManager>();
 		gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2); // This is some physics formula :)
 		maxJumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
 		minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
-		print("Gravity: " + gravity + " Jump Velocity: " + maxJumpVelocity);
 		controller.OnEnemyCollision += OnEnemyCollision;
+
+		Enemies = GameObject.FindGameObjectsWithTag("Enemy")
+							.OrderBy(go => Vector3.Distance(go.transform.position, transform.position)).ToList();
 	}
 
 	void OnEnemyCollision()
@@ -49,7 +64,10 @@ public class Player : MonoBehaviour {
 	{
 		Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
-
+		if (Input.GetMouseButtonDown(0))
+		{
+			Shoot();
+		}
 
 		if (velocity.y != 0)
 		{
@@ -59,11 +77,11 @@ public class Player : MonoBehaviour {
 		{
 			if (input.x > 0)
 			{
-				renderer.flipX = false;
+				spriteRenderer.flipX = false;
 			}
 			else
 			{
-				renderer.flipX = true;
+				spriteRenderer.flipX = true;
 			}
 			animator.Play("NinjaRun");
 		}
@@ -109,22 +127,32 @@ public class Player : MonoBehaviour {
 		{
 			if (wallSliding)
 			{
-				if (wallDirX == input.x)
+				if (abilityManager.Abilities["WallJump"].IsUnlocked)
 				{
-					velocity.x = -wallDirX * wallJumpClimb.x;
-					velocity.y = wallJumpClimb.y;
+					if (wallDirX == input.x)
+					{
+						velocity.x = -wallDirX * wallJumpClimb.x;
+						velocity.y = wallJumpClimb.y;
+					}
+					else if (input.x == 0)
+					{
+						velocity.x = -wallDirX * wallJumpOff.x;
+						velocity.y = wallJumpOff.y;
+					}
+					else
+					{
+						velocity.x = -wallDirX * wallLeap.x;
+						velocity.y = wallLeap.y;
+					}
 				}
-				else if(input.x == 0)
+
+				if (!abilityManager.Abilities["WallJump"].IsUnlocked)
 				{
 					velocity.x = -wallDirX * wallJumpOff.x;
 					velocity.y = wallJumpOff.y;
 				}
-				else
-				{
-					velocity.x = -wallDirX * wallLeap.x;
-					velocity.y = wallLeap.y;
-				}
 			}
+
 			if (controller.collisions.below)
 			{
 				velocity.y = maxJumpVelocity;
@@ -144,6 +172,17 @@ public class Player : MonoBehaviour {
 		if (controller.collisions.above || controller.collisions.below)
 		{
 			velocity.y = 0;
+		}
+	}
+
+	private void Shoot()
+	{
+		GameObject closestEnemy = Enemies.FirstOrDefault();
+		float distance = Vector2.Distance(transform.position, closestEnemy.transform.position);
+		if (distance < shootingRange)
+		{
+			Projectile newProjetile = Instantiate(projectile, transform.position, transform.rotation) as Projectile;
+			newProjetile.target = closestEnemy.transform;
 		}
 	}
 }

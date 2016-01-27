@@ -2,6 +2,7 @@
 using System.Collections;
 
 public class Enemy : MonoBehaviour {
+
 	public enum State
 	{
 		Idle,
@@ -42,10 +43,5 @@ public class Enemy : MonoBehaviour {
 
 		velocity.y -= gravity * Time.deltaTime;
 		controller.Move(velocity * Time.deltaTime);
-
-		if (controller.collisions.above || controller.collisions.below)
-		{
-			velocity.y = 0;
-		}
 	}
 }
