@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class Enemy : LivingEntity {
 
@@ -12,6 +13,8 @@ public class Enemy : LivingEntity {
 	}
 
 	public State currentState;
+	public float enemySpeed = 5;
+	public Transform healthBar;
 	Transform target;
 	float gravity = 2f;
 	Vector3 velocity;
@@ -22,27 +25,35 @@ public class Enemy : LivingEntity {
 	{
 		base.Start();
 		controller = GetComponent<Controller2D>();
+		enemySpeed = -enemySpeed;
 	}
-
-	float direction = -5;
 
 	void Update()
 	{
+		UpdateHealthBar();
+
 		if (currentState == State.Wander)
 		{
 			if (controller.collisions.left)
 			{
-				direction = 5;
+				enemySpeed = Mathf.Abs(enemySpeed);
 			}
 			else if (controller.collisions.right)
 			{
-				direction = -5;
+				enemySpeed = -enemySpeed;
 			}
 
-			velocity.x = direction;
+			velocity.x = enemySpeed;
 		}
 
 		velocity.y -= gravity * Time.deltaTime;
 		controller.Move(velocity * Time.deltaTime);
+	}
+
+	private void UpdateHealthBar()
+	{
+		float healthPercent = 0;
+		healthPercent = health / startingHealth;
+		healthBar.localScale = new Vector3(healthPercent, .1f, .1f);
 	}
 }

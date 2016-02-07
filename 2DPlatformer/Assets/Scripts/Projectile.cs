@@ -12,11 +12,8 @@ public class Projectile : MonoBehaviour {
 	public float speed = 10;
 	public float damage = 1;
 	public float lifeTime = .2f; // Must be relative depending target distance
-	float skinWidth = .1f; // Used to fix collision detection in very close range
 	public Enemy target;
 	private bool alreadyHit;
-
-	public event Action OnDestinationReach;
 
 	public float Magnitude { get; set; }
 
@@ -34,7 +31,7 @@ public class Projectile : MonoBehaviour {
 
 	Vector2 MoveTowardsCustom(Vector2 current, Enemy target, float maxDistanceDelta)
 	{
-		Vector2 bending = Vector2.down;
+		//Vector2 bending = Vector2.down;
 		Vector2 targetPosition = (Vector2)target.transform.position;
         Vector2 a = targetPosition - current;
 		float magnitude = a.magnitude;

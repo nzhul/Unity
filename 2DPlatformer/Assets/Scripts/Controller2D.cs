@@ -150,6 +150,7 @@ public class Controller2D : RaycastController {
 				{
 					if (OnEnemyCollision != null)
 					{
+						
 						OnEnemyCollision();
 					}
 				}
