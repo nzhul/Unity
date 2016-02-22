@@ -91,11 +91,6 @@ public class Player : MonoBehaviour {
 
 		Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
-		if (Input.GetMouseButtonDown(0))
-		{
-			Shoot();
-		}
-
 		if (!IsAttacking)
 		{
 			if (velocity.y != 0)
@@ -277,7 +272,7 @@ public class Player : MonoBehaviour {
 	}
 
 
-	private void Shoot()
+	public void Shoot()
 	{
 		if (closestEnemy == null)
 		{
