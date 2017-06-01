@@ -11,13 +11,11 @@ public class Grid : MonoBehaviour {
 
 	private void Awake()
 	{
-		StartCoroutine(Generate());
+		Generate();
 	}
 
-	private IEnumerator Generate()
+	private void Generate()
 	{
-		WaitForSeconds wait = new WaitForSeconds(0.05f);
-
 		GetComponent<MeshFilter>().mesh = mesh = new Mesh();
 		mesh.name = "Procedural Grid";
 
@@ -42,11 +40,11 @@ public class Grid : MonoBehaviour {
 				triangles[ti + 3] = triangles[ti + 2] = vi + 1;
 				triangles[ti + 4] = triangles[ti + 1] = vi + xSize + 1;
 				triangles[ti + 5] = vi + xSize + 2;
-
-				mesh.triangles = triangles;
-				yield return wait;
 			}
 		}
+
+		mesh.triangles = triangles;
+		//mesh.RecalculateNormals();
 
 	}
 
