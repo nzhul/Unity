@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/FramesPerSecond/FramesPerSecond.unity
+- path: Assets/Fractal/Fractal.unity
   isLoaded: 1
   isActive: 1
