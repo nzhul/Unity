@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Fractal/Fractal.unity
+- path: Assets/CurvesAndSplines/CurvesAndSpines.unity
   isLoaded: 1
   isActive: 1
