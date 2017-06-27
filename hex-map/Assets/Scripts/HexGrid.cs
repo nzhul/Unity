@@ -8,6 +8,7 @@ public class HexGrid : MonoBehaviour {
 
 	HexCell[] cells;
 	Canvas gridCanvas;
+	HexMesh hexMesh;
 
 	public int width = 6;
 	public int height = 6;
@@ -18,11 +19,12 @@ public class HexGrid : MonoBehaviour {
 	private void Awake()
 	{
 		// Utility code - remove this at some point.
-	#if UNITY_EDITOR
-			UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
+#if UNITY_EDITOR
+	UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
 #endif
 
 		gridCanvas = GetComponentInChildren<Canvas>();
+		hexMesh = GetComponentInChildren<HexMesh>();
 
 		cells = new HexCell[height * width];
 
@@ -33,6 +35,11 @@ public class HexGrid : MonoBehaviour {
 				CreateCell(x, z, i++);
 			}
 		}
+	}
+
+	private void Start()
+	{
+		hexMesh.Triangulate(cells);
 	}
 
 	private void CreateCell(int x, int z, int i)
@@ -48,10 +55,11 @@ public class HexGrid : MonoBehaviour {
 		HexCell cell = cells[i] = Instantiate<HexCell>(cellPrefab);
 		cell.transform.SetParent(this.transform, false);
 		cell.transform.localPosition = position;
+		cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
 
 		Text label = Instantiate<Text>(cellLabelPrefab);
 		label.rectTransform.SetParent(gridCanvas.transform, false);
 		label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
-		label.text = x.ToString() + "\n" + z.ToString();
+		label.text = cell.coordinates.ToStringOnSeparateLines();
 	}
 }
