@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/CurvesAndSplines/CurvesAndSplines.unity
+- path: Assets/FramesPerSecond/FramesPerSecond.unity
   isLoaded: 1
   isActive: 1
