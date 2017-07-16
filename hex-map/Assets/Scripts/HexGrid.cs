@@ -19,12 +19,16 @@ public class HexGrid : MonoBehaviour
 
   public Color defaultColor = Color.white;
 
+  public Texture2D noiseSource;
+
   private void Awake()
   {
     // Utility code - remove this at some point.
-#if UNITY_EDITOR
-    UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
-#endif
+    //#if UNITY_EDITOR
+    //    UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
+    //#endif
+
+    HexMetrics.noiseSource = noiseSource;
 
     gridCanvas = GetComponentInChildren<Canvas>();
     hexMesh = GetComponentInChildren<HexMesh>();
@@ -43,6 +47,11 @@ public class HexGrid : MonoBehaviour
   private void Start()
   {
     hexMesh.Triangulate(cells);
+  }
+
+  private void OnEnable()
+  {
+    HexMetrics.noiseSource = noiseSource;
   }
 
   public void Refresh()
@@ -105,5 +114,6 @@ public class HexGrid : MonoBehaviour
     label.text = cell.coordinates.ToStringOnSeparateLines();
 
     cell.uiRect = label.rectTransform;
+    cell.Elevation = 0;
   }
 }
