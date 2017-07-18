@@ -4,17 +4,17 @@ public static class HexMetrics
 {
   public const float outerRadius = 10f;
   public const float innerRadius = outerRadius * 0.866025404f;
-  public const float solidFactor = 0.75f;
+  public const float cellPerturbStrength = 4f; // controlls the vertex perturb percent. Higher value will result messy mesh
+  public const float solidFactor = 0.80f; // controls the size of the cell peak
   public const float blendFactor = 1f - solidFactor;
-  public const float elevationStep = 5f;
+  public const float elevationStep = 3f; // controls the height of each terrace step
+  public const float elevationPerturbStrength = 1.5f; // controls the height of cell evelation
   public const int terraceperSlope = 2;
   public const int terraceSteps = terraceperSlope * 2 + 1;
   public const float horizontalTerraceStepSize = 1f / terraceSteps;
   public const float verticalTerraceStepSize = 1f / (terraceperSlope + 1);
   public static Texture2D noiseSource;
-  public const float cellPerturbStrength = 5f;
   public const float noiseScale = 0.003f;
-  public const float elevationPerturbStrength = 1.5f;
 
   public static Vector3[] corners =
   {
