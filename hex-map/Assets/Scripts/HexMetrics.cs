@@ -16,6 +16,9 @@ public static class HexMetrics
   public static Texture2D noiseSource;
   public const float noiseScale = 0.003f;
 
+  public const int chunkSizeX = 5;
+  public const int chunkSizeZ = 5;
+
   public static Vector3[] corners =
   {
     new Vector3(0f, 0f, outerRadius),
