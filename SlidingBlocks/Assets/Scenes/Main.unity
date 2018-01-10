@@ -140,6 +140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebe04ded6cd24bd4fb28038af1c4dadb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  image: {fileID: 2800000, guid: b4c820913ce92214ea54b875a3b4f93a, type: 3}
   blocksPerLine: 4
   border: 0.5
 --- !u!4 &430175445

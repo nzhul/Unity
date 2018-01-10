@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Puzzle : MonoBehaviour
 {
-
+    public Texture2D image;
     public int blocksPerLine = 4;
     public float border = .5f;
     Block emptyBlock;
@@ -18,6 +18,8 @@ public class Puzzle : MonoBehaviour
 
     private void CreateGrid()
     {
+        Texture2D[,] imageSlices = ImageSlicer.GetSlices(image, blocksPerLine);
+
         for (int y = 0; y < blocksPerLine; y++)
         {
             for (int x = 0; x < blocksPerLine; x++)
@@ -28,8 +30,9 @@ public class Puzzle : MonoBehaviour
 
                 Block block = blockObject.AddComponent<Block>();
                 block.OnBlockPressed += PlayerMoveBlockInput;
+                block.Init(new Vector2Int(x, y), imageSlices[x, y]);
 
-                if (y == 0 && x == blocksPerLine -1)
+                if (y == 0 && x == blocksPerLine - 1)
                 {
                     blockObject.SetActive(false);
                     emptyBlock = block;
@@ -42,8 +45,12 @@ public class Puzzle : MonoBehaviour
 
     private void PlayerMoveBlockInput(Block blockToMove)
     {
-        if ((blockToMove.transform.position - emptyBlock.transform.position).sqrMagnitude == 1)
+        if ((blockToMove.coord - emptyBlock.coord).sqrMagnitude == 1)
         {
+            Vector2Int targetCoord = emptyBlock.coord;
+            emptyBlock.coord = blockToMove.coord;
+            blockToMove.coord = targetCoord;
+
             Vector2 blockToMovePosition = blockToMove.transform.position;
             blockToMove.transform.position = emptyBlock.transform.position;
             emptyBlock.transform.position = blockToMovePosition;
