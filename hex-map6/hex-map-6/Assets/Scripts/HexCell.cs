@@ -8,6 +8,14 @@ public class HexCell : MonoBehaviour {
 
 	public HexGridChunk chunk;
 
+    public float RiverSurfaceY
+    {
+        get
+        {
+            return (elevation + HexMetrics.riverSurfaceElevationOffset) * HexMetrics.elevationStep;
+        }
+    }
+
 	public Color Color {
 		get {
 			return color;
