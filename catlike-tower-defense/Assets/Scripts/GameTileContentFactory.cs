@@ -17,6 +17,9 @@ namespace Assets.Scripts
         [SerializeField]
         GameTileContent spawnPointPrefab = default;
 
+        [SerializeField]
+        Tower towerPrefab = default;
+
         public GameTileContent Get(GameTileContentType type)
         {
             switch (type)
@@ -25,6 +28,7 @@ namespace Assets.Scripts
                 case GameTileContentType.Empty: return Get(emptyPrefab);
                 case GameTileContentType.Wall: return Get(wallPrefab);
                 case GameTileContentType.SpawnPoint: return Get(spawnPointPrefab);
+                case GameTileContentType.Tower: return Get(towerPrefab);
             }
 
             Debug.Assert(false, "Unsupported type: " + type);

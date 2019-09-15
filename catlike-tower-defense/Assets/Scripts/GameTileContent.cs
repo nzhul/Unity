@@ -2,6 +2,7 @@
 
 namespace Assets.Scripts
 {
+    [SelectionBase]
     public class GameTileContent : MonoBehaviour
     {
         [SerializeField]
@@ -11,6 +12,8 @@ namespace Assets.Scripts
 
         GameTileContentFactory originFactory;
 
+        public bool BlocksPath => Type == GameTileContentType.Wall || Type == GameTileContentType.Tower;
+
         public GameTileContentFactory OriginFactory
         {
             get => originFactory;
@@ -19,6 +22,11 @@ namespace Assets.Scripts
                 Debug.Assert(originFactory == null, "Redefined origin factory!");
                 originFactory = value;
             }
+        }
+
+        public virtual void GameUpdate()
+        {
+
         }
 
         public void Recycle()

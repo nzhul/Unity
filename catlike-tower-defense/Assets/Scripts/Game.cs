@@ -55,6 +55,13 @@ public class Game : MonoBehaviour
         }
 
         enemies.GameUpdate();
+        ///All seems to work fine, except towers that can target the center of the board are able to acquire targets that should be out of range. 
+        ///They will fail to track those targets, so they only lock on for a single frame per target.
+        ///This happens because the state of the physics engine is not perfectly synchronized with our game state. 
+        ///All enemies are instantiated at the world origin, which coincides with the center of the board. 
+        ///We then move them to their spawn point, but the physics engine isn't immediately aware of that.
+        Physics.SyncTransforms();
+        board.GameUpdate();
     }
 
     void SpawnEnemy()
@@ -86,7 +93,14 @@ public class Game : MonoBehaviour
         GameTile tile = board.GetTile(TouchRay);
         if (tile != null)
         {
-            board.ToggleWall(tile);
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                board.ToggleTower(tile);
+            }
+            else
+            {
+                board.ToggleWall(tile);
+            }
         }
     }
 

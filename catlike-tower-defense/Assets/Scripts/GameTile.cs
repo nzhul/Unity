@@ -117,6 +117,6 @@ public class GameTile : MonoBehaviour
 
         neighbor.PathDirection = direction;
 
-        return neighbor.Content.Type != GameTileContentType.Wall ? neighbor : null;
+        return neighbor.Content.BlocksPath ? null : neighbor;
     }
 }

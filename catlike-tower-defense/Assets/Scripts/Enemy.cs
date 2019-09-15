@@ -21,6 +21,10 @@ namespace Assets.Scripts
 
         float speed;
 
+        public float Health { get; set; }
+
+        public float Scale { get; private set; }
+
         public EnemyFactory OriginFactory
         {
             get => originFactory;
@@ -43,9 +47,17 @@ namespace Assets.Scripts
 
         public void Initialize(float scale, float speed, float pathOffset)
         {
+            Scale = scale;
             model.localScale = new Vector3(scale, scale, scale);
             this.speed = speed;
             this.pathOffset = pathOffset;
+            this.Health = 100f * scale;
+        }
+
+        public void ApplyDamage(float damage)
+        {
+            Debug.Assert(damage >= 0f, "Negative damage applied.");
+            this.Health -= damage;
         }
 
         void PrepareForward()
@@ -128,6 +140,12 @@ namespace Assets.Scripts
 
         public bool GameUpdate()
         {
+            if (this.Health <= 0f)
+            {
+                this.OriginFactory.Reclaim(this);
+                return false;
+            }
+
             progress += Time.deltaTime * progressFactor;
             while (progress >= 1f)
             {

@@ -25,6 +25,8 @@ public class GameBoard : MonoBehaviour
 
     List<GameTile> spawnPoints = new List<GameTile>();
 
+    List<GameTileContent> updatingContent = new List<GameTileContent>();
+
     public int SpawnPointCount => spawnPoints.Count;
 
     public void Initialize(Vector2Int size, GameTileContentFactory contentFactory)
@@ -70,7 +72,13 @@ public class GameBoard : MonoBehaviour
 
     public GameTile GetTile(Ray ray)
     {
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        /// Also, the player interaction should ignore enemy colliders. 
+        /// We can do that by adding a layer mask argument to Physics.
+        /// Raycast in GameBoard.GetTile. It has a variant that takes the ray distance 
+        /// and the layer mask as additional arguments. Provide the maximum range 
+        /// and the layer mask for the default layer, which is 1.
+        
+        if (Physics.Raycast(ray, out RaycastHit hit, float.MaxValue, 1))
         {
             int x = (int)(hit.point.x + size.x * 0.5f);
             int y = (int)(hit.point.z + size.y * 0.5f);
@@ -116,6 +124,34 @@ public class GameBoard : MonoBehaviour
                 tile.Content = contentFactory.Get(GameTileContentType.Empty);
                 FindPaths();
             }
+        }
+    }
+
+    public void ToggleTower(GameTile tile)
+    {
+        if (tile.Content.Type == GameTileContentType.Tower)
+        {
+            updatingContent.Remove(tile.Content);
+            tile.Content = contentFactory.Get(GameTileContentType.Empty);
+            FindPaths();
+        }
+        else if (tile.Content.Type == GameTileContentType.Empty)
+        {
+            tile.Content = contentFactory.Get(GameTileContentType.Tower);
+            if (FindPaths())
+            {
+                updatingContent.Add(tile.Content);
+            }
+            else
+            {
+                tile.Content = contentFactory.Get(GameTileContentType.Empty);
+                FindPaths();
+            }
+        }
+        else if (tile.Content.Type == GameTileContentType.Wall)
+        {
+            tile.Content = contentFactory.Get(GameTileContentType.Tower);
+            updatingContent.Add(tile.Content);
         }
     }
 
@@ -181,6 +217,14 @@ public class GameBoard : MonoBehaviour
     public GameTile GetSpawnPoint(int index)
     {
         return spawnPoints[index];
+    }
+
+    public void GameUpdate()
+    {
+        for (int i = 0; i < updatingContent.Count; i++)
+        {
+            updatingContent[i].GameUpdate();
+        }
     }
 
     private bool FindPaths()
