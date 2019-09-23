@@ -1,62 +1,16 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Assets.Scripts
 {
-    public class Tower : GameTileContent
+    public abstract class Tower : GameTileContent
     {
 
         [SerializeField, Range(1.5f, 10.5f)]
-        float targetingRange = 1.5f;
+        protected float targetingRange = 1.5f;
 
-        [SerializeField]
-        Transform turret = default;
+        public abstract TowerType TowerType { get; }
 
-        [SerializeField]
-        Transform laserBeam = default;
-
-        [SerializeField, Range(1f, 100f)]
-        float damagePerSecond = 10f;
-
-        TargetPoint target;
-
-        const int enemyLayerMask = 1 << 9;
-
-        static Collider[] targetsBuffer = new Collider[100];
-
-        Vector3 laserBeamScale;
-
-        private void Awake()
-        {
-            laserBeamScale = laserBeam.localScale;
-        }
-
-        public override void GameUpdate()
-        {
-            if (TrackTarget() || AcquireTarget())
-            {
-                Shoot();
-            }
-            else
-            {
-                laserBeam.localScale = Vector3.zero;
-            }
-        }
-
-        private void Shoot()
-        {
-            Vector3 point = target.Position;
-            turret.LookAt(point);
-            laserBeam.localRotation = turret.localRotation;
-
-            float d = Vector3.Distance(turret.position, point);
-            laserBeamScale.z = d;
-            laserBeam.localScale = laserBeamScale;
-            laserBeam.localPosition = turret.localPosition + 0.5f * d * laserBeam.forward;
-            target.Enemy.ApplyDamage(damagePerSecond * Time.deltaTime);
-        }
-
-        private bool TrackTarget()
+        protected bool TrackTarget(ref TargetPoint target)
         {
             if (target == null)
             {
@@ -75,14 +29,21 @@ namespace Assets.Scripts
             return true;
         }
 
-        private bool AcquireTarget()
+        protected bool AcquireTarget(out TargetPoint target)
         {
-            int hits = Physics.OverlapSphereNonAlloc(transform.localPosition, targetingRange, targetsBuffer, enemyLayerMask);
+            // For future reference:
+            //int hits = Physics.OverlapSphereNonAlloc(transform.localPosition, targetingRange, targetsBuffer, enemyLayerMask);
 
-            if (hits > 0)
+            //if (hits > 0)
+            //{
+            //    target = targetsBuffer[UnityEngine.Random.Range(0, hits)].GetComponent<TargetPoint>();
+            //    Debug.Assert(target != null, "Targeted non-enemy!", targetsBuffer[0]);
+            //    return true;
+            //}
+
+            if (TargetPoint.FillBuffer(transform.localPosition, targetingRange))
             {
-                target = targetsBuffer[UnityEngine.Random.Range(0, hits)].GetComponent<TargetPoint>();
-                Debug.Assert(target != null, "Targeted non-enemy!", targetsBuffer[0]);
+                target = TargetPoint.RandomBuffered;
                 return true;
             }
 
@@ -96,11 +57,6 @@ namespace Assets.Scripts
             Vector3 position = transform.localPosition;
             position.y += 0.01f;
             Gizmos.DrawWireSphere(position, targetingRange);
-
-            if (target != null)
-            {
-                Gizmos.DrawLine(position, target.Position);
-            }
         }
     }
 }

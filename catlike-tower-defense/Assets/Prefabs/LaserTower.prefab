@@ -333,7 +333,7 @@ GameObject:
   - component: {fileID: 7131088448808684940}
   - component: {fileID: 1161602807002751236}
   m_Layer: 0
-  m_Name: Tower
+  m_Name: LaserTower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -366,11 +366,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 7131088448808684941}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 199381c36d7df674cb86c7936c048dac, type: 3}
+  m_Script: {fileID: 11500000, guid: 91177a7241df14a42926aa5066654406, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   type: 4
-  targetingRange: 1.5
+  targetingRange: 2.5
+  damagePerSecond: 20
   turret: {fileID: 7131088447597443561}
   laserBeam: {fileID: 7131088447845792803}
-  damagePerSecond: 20

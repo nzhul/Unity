@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts
 {
-    public class Enemy : MonoBehaviour
+    public class Enemy : GameBehavior
     {
         [SerializeField]
         Transform model = default;
@@ -138,7 +138,7 @@ namespace Assets.Scripts
             progressFactor = 2f * speed;
         }
 
-        public bool GameUpdate()
+        public override bool GameUpdate()
         {
             if (this.Health <= 0f)
             {

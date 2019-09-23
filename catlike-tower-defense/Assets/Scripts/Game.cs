@@ -18,14 +18,27 @@ public class Game : MonoBehaviour
     [SerializeField, Range(0.1f, 10f)]
     float spawnSpeed = 1f;
 
+    [SerializeField]
+    WarFactory warFactory = default;
+
     float spawnProgress;
 
-    EnemyCollection enemies = new EnemyCollection();
+    GameBehaviourCollection enemies = new GameBehaviourCollection();
+    GameBehaviourCollection nonEnemies = new GameBehaviourCollection();
+
+    TowerType selectedTowerType;
+
+    static Game instance;
 
     private void Awake()
     {
         board.Initialize(boardSize, tileContentFactory);
         board.ShowGrid = true;
+    }
+
+    private void OnEnable()
+    {
+        instance = this;
     }
 
     private void Update()
@@ -38,14 +51,26 @@ public class Game : MonoBehaviour
         {
             HandleAlternativeTouch();
         }
+
         if (Input.GetKeyDown(KeyCode.V))
         {
             board.ShowPaths = !board.ShowPaths;
         }
+
         if (Input.GetKeyDown(KeyCode.G))
         {
             board.ShowGrid = !board.ShowGrid;
         }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            selectedTowerType = TowerType.Laser;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            selectedTowerType = TowerType.Mortar;
+        }
+
 
         spawnProgress += spawnSpeed * Time.deltaTime;
         while (spawnProgress >= 1f)
@@ -62,6 +87,21 @@ public class Game : MonoBehaviour
         ///We then move them to their spawn point, but the physics engine isn't immediately aware of that.
         Physics.SyncTransforms();
         board.GameUpdate();
+        nonEnemies.GameUpdate();
+    }
+
+    public static Shell SpawnShell()
+    {
+        Shell shell = instance.warFactory.Shell;
+        instance.nonEnemies.Add(shell);
+        return shell;
+    }
+
+    public static Explosion SpawnExplosion()
+    {
+        Explosion explosion = instance.warFactory.Explosion;
+        instance.nonEnemies.Add(explosion);
+        return explosion;
     }
 
     void SpawnEnemy()
@@ -95,7 +135,7 @@ public class Game : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.LeftShift))
             {
-                board.ToggleTower(tile);
+                board.ToggleTower(tile, selectedTowerType);
             }
             else
             {
