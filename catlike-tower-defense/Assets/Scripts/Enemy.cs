@@ -45,19 +45,59 @@ namespace Assets.Scripts
             PrepareIntro();
         }
 
-        public void Initialize(float scale, float speed, float pathOffset)
+        public void Initialize(float scale, float speed, float pathOffset, float health)
         {
             Scale = scale;
             model.localScale = new Vector3(scale, scale, scale);
             this.speed = speed;
             this.pathOffset = pathOffset;
-            this.Health = 100f * scale;
+            this.Health = health;
         }
 
         public void ApplyDamage(float damage)
         {
             Debug.Assert(damage >= 0f, "Negative damage applied.");
             this.Health -= damage;
+        }
+
+        public override bool GameUpdate()
+        {
+            if (this.Health <= 0f)
+            {
+                Recycle();
+                return false;
+            }
+
+            progress += Time.deltaTime * progressFactor;
+            while (progress >= 1f)
+            {
+                if (tileTo == null)
+                {
+                    Game.EnemyReachedDestination();
+                    Recycle();
+                    return false;
+                }
+
+                progress = (progress - 1f) / progressFactor;
+                PrepareNextState();
+                progress *= progressFactor;
+            }
+
+            if (directionChange == DirectionChange.None)
+            {
+                transform.localPosition = Vector3.LerpUnclamped(positionFrom, positionTo, progress);
+            }
+            else
+            {
+                float angle = Mathf.LerpUnclamped(directionAngleFrom, directionAngleTo, progress);
+                transform.localRotation = Quaternion.Euler(0f, angle, 0f);
+            }
+            return true;
+        }
+
+        public override void Recycle()
+        {
+            OriginFactory.Reclaim(this);
         }
 
         void PrepareForward()
@@ -136,40 +176,6 @@ namespace Assets.Scripts
             model.localPosition = new Vector3(pathOffset, 0f);
             transform.localRotation = direction.GetRotation();
             progressFactor = 2f * speed;
-        }
-
-        public override bool GameUpdate()
-        {
-            if (this.Health <= 0f)
-            {
-                this.OriginFactory.Reclaim(this);
-                return false;
-            }
-
-            progress += Time.deltaTime * progressFactor;
-            while (progress >= 1f)
-            {
-                if (tileTo == null)
-                {
-                    OriginFactory.Reclaim(this);
-                    return false;
-                }
-
-                progress = (progress - 1f) / progressFactor;
-                PrepareNextState();
-                progress *= progressFactor;
-            }
-
-            if (directionChange == DirectionChange.None)
-            {
-                transform.localPosition = Vector3.LerpUnclamped(positionFrom, positionTo, progress);
-            }
-            else
-            {
-                float angle = Mathf.LerpUnclamped(directionAngleFrom, directionAngleTo, progress);
-                transform.localRotation = Quaternion.Euler(0f, angle, 0f);
-            }
-            return true;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Assets.Scripts
         [SerializeField, Range(0.5f, 3f)]
         float shellBlastRadius = 1f;
 
-        [SerializeField, Range(1f , 100f)]
+        [SerializeField, Range(1f, 100f)]
         float shellDamage = 10f;
 
         [SerializeField]

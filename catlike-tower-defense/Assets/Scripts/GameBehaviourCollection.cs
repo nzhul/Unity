@@ -6,25 +6,36 @@ namespace Assets.Scripts
     [Serializable]
     public class GameBehaviourCollection
     {
-        List<GameBehavior> behaviours = new List<GameBehavior>();
+        List<GameBehavior> behaviors = new List<GameBehavior>();
+
+        public bool IsEmpty => behaviors.Count == 0;
 
         public void Add(GameBehavior behaviour)
         {
-            behaviours.Add(behaviour);
+            behaviors.Add(behaviour);
         }
 
         public void GameUpdate()
         {
-            for (int i = 0; i < behaviours.Count; i++)
+            for (int i = 0; i < behaviors.Count; i++)
             {
-                if (!behaviours[i].GameUpdate())
+                if (!behaviors[i].GameUpdate())
                 {
-                    int lastIndex = behaviours.Count - 1;
-                    behaviours[i] = behaviours[lastIndex];
-                    behaviours.RemoveAt(lastIndex);
+                    int lastIndex = behaviors.Count - 1;
+                    behaviors[i] = behaviors[lastIndex];
+                    behaviors.RemoveAt(lastIndex);
                     i -= 1;
                 }
             }
+        }
+
+        public void Clear()
+        {
+            for (int i = 0; i < behaviors.Count; i++)
+            {
+                behaviors[i].Recycle();
+            }
+            behaviors.Clear();
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Assets.Scripts
             }
         }
 
-        public void Recycle()
+        public override void Recycle()
         {
             originFactory.Reclaim(this);
         }

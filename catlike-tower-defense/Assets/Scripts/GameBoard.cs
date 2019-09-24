@@ -62,10 +62,23 @@ public class GameBoard : MonoBehaviour
                     tile.IsAlternative = !tile.IsAlternative;
                 }
 
-                tile.Content = contentFactory.Get(GameTileContentType.Empty);
+                //tile.Content = contentFactory.Get(GameTileContentType.Empty);
             }
         }
 
+        //ToggleDestination(tiles[tiles.Length / 2]);
+        //ToggleSpawnPoint(tiles[0]);
+        Clear();
+    }
+
+    public void Clear()
+    {
+        foreach (GameTile tile in tiles)
+        {
+            tile.Content = contentFactory.Get(GameTileContentType.Empty);
+        }
+        spawnPoints.Clear();
+        updatingContent.Clear();
         ToggleDestination(tiles[tiles.Length / 2]);
         ToggleSpawnPoint(tiles[0]);
     }
@@ -77,7 +90,7 @@ public class GameBoard : MonoBehaviour
         /// Raycast in GameBoard.GetTile. It has a variant that takes the ray distance 
         /// and the layer mask as additional arguments. Provide the maximum range 
         /// and the layer mask for the default layer, which is 1.
-        
+
         if (Physics.Raycast(ray, out RaycastHit hit, float.MaxValue, 1))
         {
             int x = (int)(hit.point.x + size.x * 0.5f);
@@ -102,7 +115,7 @@ public class GameBoard : MonoBehaviour
                 FindPaths();
             }
         }
-        else if(tile.Content.Type == GameTileContentType.Empty)
+        else if (tile.Content.Type == GameTileContentType.Empty)
         {
             tile.Content = contentFactory.Get(GameTileContentType.Destination);
             FindPaths();
@@ -116,7 +129,7 @@ public class GameBoard : MonoBehaviour
             tile.Content = contentFactory.Get(GameTileContentType.Empty);
             FindPaths();
         }
-        else if(tile.Content.Type == GameTileContentType.Empty)
+        else if (tile.Content.Type == GameTileContentType.Empty)
         {
             tile.Content = contentFactory.Get(GameTileContentType.Wall);
             if (!FindPaths())

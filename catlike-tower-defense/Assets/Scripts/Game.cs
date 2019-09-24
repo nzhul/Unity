@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class Game : MonoBehaviour
 {
+    const float pausedTimeScale = 0f;
+
+    [SerializeField, Range(1f, 10f)]
+    float playSpeed = 1f;
+
     [SerializeField]
     Vector2Int boardSize = new Vector2Int(11, 11);
 
@@ -13,15 +18,17 @@ public class Game : MonoBehaviour
     GameTileContentFactory tileContentFactory = default;
 
     [SerializeField]
-    EnemyFactory enemyFactory = default;
-
-    [SerializeField, Range(0.1f, 10f)]
-    float spawnSpeed = 1f;
-
-    [SerializeField]
     WarFactory warFactory = default;
 
-    float spawnProgress;
+    [SerializeField]
+    GameScenario scenario = default;
+
+    [SerializeField]
+    int startingPlayerHealth = 10;
+
+    int playerHealth;
+
+    GameScenario.State activeScenario;
 
     GameBehaviourCollection enemies = new GameBehaviourCollection();
     GameBehaviourCollection nonEnemies = new GameBehaviourCollection();
@@ -32,8 +39,10 @@ public class Game : MonoBehaviour
 
     private void Awake()
     {
+        playerHealth = startingPlayerHealth;
         board.Initialize(boardSize, tileContentFactory);
         board.ShowGrid = true;
+        activeScenario = scenario.Begin();
     }
 
     private void OnEnable()
@@ -71,13 +80,34 @@ public class Game : MonoBehaviour
             selectedTowerType = TowerType.Mortar;
         }
 
-
-        spawnProgress += spawnSpeed * Time.deltaTime;
-        while (spawnProgress >= 1f)
+        if (Input.GetKeyDown(KeyCode.B))
         {
-            spawnProgress -= 1f;
-            SpawnEnemy();
+            BeginNewGame();
         }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Time.timeScale = Time.timeScale > pausedTimeScale ? pausedTimeScale : 1f;
+        }
+        else if (Time.timeScale > pausedTimeScale)
+        {
+            Time.timeScale = playSpeed;
+        }
+
+        if (playerHealth <= 0 && startingPlayerHealth > 0)
+        {
+            Debug.Log("Defeat!");
+            BeginNewGame();
+        }
+
+        if (!activeScenario.Progress() && enemies.IsEmpty)
+        {
+            Debug.Log("Victory!");
+            BeginNewGame();
+            activeScenario.Progress();
+        }
+
+        activeScenario.Progress();
 
         enemies.GameUpdate();
         ///All seems to work fine, except towers that can target the center of the board are able to acquire targets that should be out of range. 
@@ -104,12 +134,14 @@ public class Game : MonoBehaviour
         return explosion;
     }
 
-    void SpawnEnemy()
+    public static void SpawnEnemy (EnemyFactory factory, EnemyType type)
     {
-        GameTile spawnPoint = board.GetSpawnPoint(Random.Range(0, board.SpawnPointCount));
-        Enemy enemy = enemyFactory.Get();
+        GameTile spawnPoint = instance.board.GetSpawnPoint(
+            Random.Range(0, instance.board.SpawnPointCount)
+            );
+        Enemy enemy = factory.Get(type);
         enemy.SpawnOn(spawnPoint);
-        enemies.Add(enemy);
+        instance.enemies.Add(enemy);
     }
 
     private void HandleAlternativeTouch()
@@ -156,5 +188,19 @@ public class Game : MonoBehaviour
         {
             boardSize.y = 2;
         }
+    }
+
+    private void BeginNewGame()
+    {
+        playerHealth = startingPlayerHealth;
+        enemies.Clear();
+        nonEnemies.Clear();
+        board.Clear();
+        activeScenario = scenario.Begin();
+    }
+
+    public static void EnemyReachedDestination()
+    {
+        instance.playerHealth -= 1;
     }
 }
