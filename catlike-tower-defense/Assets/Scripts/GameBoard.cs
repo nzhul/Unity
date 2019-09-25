@@ -306,8 +306,6 @@ public class GameBoard : MonoBehaviour
             }
         }
 
-        Debug.Log("Pathfinding complete!");
-
         return true;
     }
 }

@@ -18,9 +18,6 @@ namespace Assets.Scripts
         GameTileContent spawnPointPrefab = default;
 
         [SerializeField]
-        Tower towerPrefab = default;
-
-        [SerializeField]
         Tower[] towerPrefabs = default;
 
         public GameTileContent Get(GameTileContentType type)

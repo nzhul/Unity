@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using static Assets.Scripts.EnemyAnimator;
 
 namespace Assets.Scripts
 {
@@ -6,6 +7,9 @@ namespace Assets.Scripts
     {
         [SerializeField]
         Transform model = default;
+
+        [SerializeField]
+        EnemyAnimationConfig animationConfig = default;
 
         EnemyFactory originFactory;
 
@@ -21,6 +25,21 @@ namespace Assets.Scripts
 
         float speed;
 
+        Collider targetPointCollider;
+
+        EnemyAnimator animator;
+
+        public bool IsValidTarget => animator.CurrentClip == Clip.Move;
+
+        public Collider TargetPointCollider
+        {
+            set
+            {
+                Debug.Assert(targetPointCollider == null, "Redefined collider!");
+                targetPointCollider = value;
+            }
+        }
+
         public float Health { get; set; }
 
         public float Scale { get; private set; }
@@ -33,6 +52,14 @@ namespace Assets.Scripts
                 Debug.Assert(originFactory == null, "Redefined origin factory!");
                 originFactory = value;
             }
+        }
+
+        private void Awake()
+        {
+            animator.Configure(
+                model.GetChild(0).gameObject.AddComponent<Animator>(),
+                animationConfig
+                );
         }
 
         public void SpawnOn(GameTile tile)
@@ -52,6 +79,8 @@ namespace Assets.Scripts
             this.speed = speed;
             this.pathOffset = pathOffset;
             this.Health = health;
+            animator.PlayIntro();
+            targetPointCollider.enabled = false;
         }
 
         public void ApplyDamage(float damage)
@@ -62,10 +91,34 @@ namespace Assets.Scripts
 
         public override bool GameUpdate()
         {
+            animator.GameUpdate();
+
+            if (animator.CurrentClip == Clip.Intro)
+            {
+                if (!animator.IsDone)
+                {
+                    return true;
+                }
+
+                animator.PlayMove(speed / Scale);
+                targetPointCollider.enabled = true;
+            }
+            else if (animator.CurrentClip >= Clip.Outro)
+            {
+                if (animator.IsDone)
+                {
+                    Recycle();
+                    return false;
+                }
+
+                return true;
+            }
+
             if (this.Health <= 0f)
             {
-                Recycle();
-                return false;
+                animator.PlayDying();
+                targetPointCollider.enabled = false;
+                return true;
             }
 
             progress += Time.deltaTime * progressFactor;
@@ -74,8 +127,9 @@ namespace Assets.Scripts
                 if (tileTo == null)
                 {
                     Game.EnemyReachedDestination();
-                    Recycle();
-                    return false;
+                    animator.PlayOutro();
+                    targetPointCollider.enabled = false;
+                    return true;
                 }
 
                 progress = (progress - 1f) / progressFactor;
@@ -97,6 +151,7 @@ namespace Assets.Scripts
 
         public override void Recycle()
         {
+            animator.Stop();
             OriginFactory.Reclaim(this);
         }
 
@@ -159,6 +214,7 @@ namespace Assets.Scripts
         void PrepareIntro()
         {
             positionFrom = tileFrom.transform.localPosition;
+            transform.localPosition = positionFrom;
             positionTo = tileFrom.ExitPoint;
             direction = tileFrom.PathDirection;
             directionChange = DirectionChange.None;
@@ -176,6 +232,11 @@ namespace Assets.Scripts
             model.localPosition = new Vector3(pathOffset, 0f);
             transform.localRotation = direction.GetRotation();
             progressFactor = 2f * speed;
+        }
+
+        private void OnDestroy()
+        {
+            animator.Destroy();
         }
     }
 }

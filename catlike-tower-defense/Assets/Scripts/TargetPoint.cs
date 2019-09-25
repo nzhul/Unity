@@ -22,6 +22,7 @@ namespace Assets.Scripts
             Enemy = transform.root.GetComponent<Enemy>();
             Debug.Assert(Enemy != null, "Target point without Enemy root!", this);
             Debug.Assert(gameObject.layer == 9, "Target point on wrong layer!", this);
+            this.Enemy.TargetPointCollider = GetComponent<Collider>();
         }
 
         public static bool FillBuffer(Vector3 position, float range)

@@ -180,3 +180,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model: {fileID: 6613080328055977438}
+  animationConfig: {fileID: 11400000, guid: e69953e0a0e3655438a51a0b7e05b014, type: 2}
