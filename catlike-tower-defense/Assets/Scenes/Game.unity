@@ -390,7 +390,7 @@ MonoBehaviour:
   board: {fileID: 276338303}
   tileContentFactory: {fileID: 11400000, guid: a14759eb775e558479be1fd625812c52, type: 2}
   warFactory: {fileID: 11400000, guid: bd269312cce800c4b9231c75bd87f83e, type: 2}
-  scenario: {fileID: 11400000, guid: 685d7f415ab29bf429886715b4d61232, type: 2}
+  scenario: {fileID: 11400000, guid: 13c59fb2f807c2f45ac38ed4b4248e73, type: 2}
   startingPlayerHealth: 50
 --- !u!1 &1600613839
 GameObject:

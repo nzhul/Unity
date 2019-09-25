@@ -6,6 +6,10 @@ namespace Assets.Scripts
 {
     /// <summary>
     /// For more information: https://catlikecoding.com/unity/tutorials/tower-defense/animation/
+    /// How do I make the graph work with enemy reuse?
+    /// Before playing the graph again you'll have to set the time all clips to zero and pause them. 
+    /// The weights of the last active clips must also become zero. Finally, the done state of non-looping clips has to be reset, 
+    /// by invoking SetDone(false) on them.
     /// </summary>
     [System.Serializable]
     public struct EnemyAnimator
@@ -35,11 +39,63 @@ namespace Assets.Scripts
 
         float transitionProgress;
 
+        bool hasAppearClip, hasDisappearClip;
+
+#if UNITY_EDITOR
+        double clipTime;
+
+        public bool IsValid => graph.IsValid();
+
+        public void RestoreAfterHotReload(
+            Animator animator, EnemyAnimationConfig config, float speed
+        )
+        {
+            Configure(animator, config);
+            GetPlayable(Clip.Move).SetSpeed(speed);
+            var clip = GetPlayable(CurrentClip);
+            clip.SetTime(clipTime);
+            clip.Play();
+            SetWeight(CurrentClip, 1f);
+            graph.Play();
+
+            if (CurrentClip == Clip.Intro && hasAppearClip)
+            {
+                clip = GetPlayable(Clip.Appear);
+                clip.SetTime(clipTime);
+                clip.Play();
+                SetWeight(Clip.Appear, 1f);
+            }
+            else if (CurrentClip >= Clip.Outro && hasDisappearClip)
+            {
+                clip = GetPlayable(Clip.Disappear);
+                clip.Play();
+                double delay =
+                    GetPlayable(CurrentClip).GetDuration() -
+                    clip.GetDuration() -
+                    clipTime;
+                if (delay >= 0f)
+                {
+                    clip.SetDelay(delay);
+                }
+                else
+                {
+                    clip.SetTime(-delay);
+                }
+                SetWeight(Clip.Disappear, 1f);
+            }
+        }
+#endif
+
         public void Configure(Animator animator, EnemyAnimationConfig config)
         {
+            hasAppearClip = config.Appear;
+            hasDisappearClip = config.Disappear;
+
             graph = PlayableGraph.Create();
             graph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
-            mixer = AnimationMixerPlayable.Create(graph, 4);
+            mixer = AnimationMixerPlayable.Create(
+                        graph, hasAppearClip || hasDisappearClip ? 6 : 4
+                    );
 
             /// To play an animation clip we first have to create a playable representation of it, 
             /// via AnimationClipPlayable.Create. We have to provide the graph it belongs to and the animation clip as arguments.
@@ -65,6 +121,22 @@ namespace Assets.Scripts
             clip.Pause();
             mixer.ConnectInput((int)Clip.Dying, clip, 0);
 
+            if (hasAppearClip)
+            {
+                clip = AnimationClipPlayable.Create(graph, config.Appear);
+                clip.SetDuration(config.Appear.length);
+                clip.Pause();
+                mixer.ConnectInput((int)Clip.Appear, clip, 0);
+            }
+
+            if (hasDisappearClip)
+            {
+                clip = AnimationClipPlayable.Create(graph, config.Disappear);
+                clip.SetDuration(config.Disappear.length);
+                clip.Pause();
+                mixer.ConnectInput((int)Clip.Disappear, clip, 0);
+            }
+
             var output = AnimationPlayableOutput.Create(graph, "Enemy", animator);
             output.SetSourcePlayable(mixer);
         }
@@ -75,6 +147,12 @@ namespace Assets.Scripts
             CurrentClip = Clip.Intro;
             graph.Play();
             transitionProgress = -1f;
+
+            if (hasAppearClip)
+            {
+                GetPlayable(Clip.Appear).Play();
+                SetWeight(Clip.Appear, 1f);
+            }
         }
 
         public void PlayMove(float speed)
@@ -88,6 +166,11 @@ namespace Assets.Scripts
 
             GetPlayable(Clip.Move).SetSpeed(speed);
             BeginTransition(Clip.Move);
+
+            if (hasAppearClip)
+            {
+                SetWeight(Clip.Appear, 0f);
+            }
         }
 
         public void PlayOutro()
@@ -98,11 +181,21 @@ namespace Assets.Scripts
             //CurrentClip = Clip.Outro;
 
             BeginTransition(Clip.Outro);
+
+            if (hasDisappearClip)
+            {
+                PlayDisappearFor(Clip.Outro);
+            }
         }
 
         public void PlayDying()
         {
             BeginTransition(Clip.Dying);
+
+            if (hasDisappearClip)
+            {
+                PlayDisappearFor(Clip.Dying);
+            }
         }
 
         public void Stop()
@@ -133,6 +226,10 @@ namespace Assets.Scripts
                     SetWeight(previousClip, 1f - transitionProgress);
                 }
             }
+
+#if UNITY_EDITOR
+            clipTime = GetPlayable(CurrentClip).GetTime();
+#endif
         }
 
         private void SetWeight(Clip clip, float weight)
@@ -153,12 +250,25 @@ namespace Assets.Scripts
             GetPlayable(nextClip).Play();
         }
 
+        private void PlayDisappearFor(Clip otherClip)
+        {
+            var clip = GetPlayable(Clip.Disappear);
+            clip.Play();
+
+            var outroDuration = GetPlayable(otherClip).GetDuration();
+            var disapearDuration = clip.GetDuration();
+            clip.SetDelay(outroDuration - disapearDuration);
+            SetWeight(Clip.Disappear, 1f);
+        }
+
         public enum Clip
         {
             Move,
             Intro,
             Outro,
-            Dying
+            Dying,
+            Appear,
+            Disappear
         }
     }
 }

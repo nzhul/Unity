@@ -91,6 +91,17 @@ namespace Assets.Scripts
 
         public override bool GameUpdate()
         {
+#if UNITY_EDITOR
+            if (!animator.IsValid)
+            {
+                animator.RestoreAfterHotReload(
+                    model.GetChild(0).GetComponent<Animator>(),
+                    animationConfig,
+                    animationConfig.MoveAnimationSpeed * speed / Scale
+                );
+            }
+#endif
+
             animator.GameUpdate();
 
             if (animator.CurrentClip == Clip.Intro)
@@ -100,7 +111,7 @@ namespace Assets.Scripts
                     return true;
                 }
 
-                animator.PlayMove(speed / Scale);
+                animator.PlayMove(animationConfig.MoveAnimationSpeed * speed / Scale);
                 targetPointCollider.enabled = true;
             }
             else if (animator.CurrentClip >= Clip.Outro)
